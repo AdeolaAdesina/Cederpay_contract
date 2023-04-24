@@ -97,6 +97,9 @@ Finally, run the test suite by running:
 npx hardhat test
 ```
  
+ 
+# Deploying the smart contract
+
  Run the following command to create a new Hardhat project:
 
 ```npx hardhat init```
@@ -159,4 +162,41 @@ You can now run the following command to deploy your Solidity smart contract to 
 npx hardhat run --network testnet scripts/deploy.js
 ```
 
+deploy.js:
 
+```
+const { ethers } = require("hardhat");
+const fs = require('fs');
+
+async function main() {
+  // Retrieve the provider and the signer from the Hardhat runtime
+  const provider = ethers.provider;
+  const signer = ethers.provider.getSigner();
+
+  // Compile the contract
+  const factory = await ethers.getContractFactory("CollateralizedToken");
+  console.log("Contract compiled");
+
+  // Deploy the contract
+  const contract = await factory.deploy(hBarTokenAddress, 2);
+  console.log(`Contract deployed to address: ${contract.address}`);
+
+  // Verify the contract on Etherscan (optional)
+  await contract.verify();
+
+  // Write the contract address to a file
+  fs.writeFileSync("contract-address.txt", contract.address);
+
+  // Print the contract's ABI (optional)
+  const abi = JSON.stringify(contract.interface.abi, null, 2);
+  console.log(`Contract ABI:\n${abi}`);
+}
+
+// Run the deploy function
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+```
